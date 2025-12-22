@@ -25,4 +25,12 @@ dist-ssr
 
 
 .vercel
+
+# Media files - served from Cloudflare R2, not GitHub
+data/audio/
+data/videos/
+data/thumbnails/
+data/extracted/
+public/images/
 public/curated/
+

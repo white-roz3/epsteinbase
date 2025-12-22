@@ -7,7 +7,7 @@ import os
 import json
 from pathlib import Path
 from glob import glob
-from .b2_client import get_b2_url, list_b2_files
+from .b2_client import get_file_url, list_files, get_b2_url, list_b2_files  # Backward compat
 
 app = FastAPI(title="EpsteinBase API")
 
@@ -33,8 +33,8 @@ DATA_DIR.mkdir(exist_ok=True)
 EXTRACTED_DIR = DATA_DIR / "extracted"
 THUMBNAIL_DIR = DATA_DIR / "thumbnails"
 
-# Only mount filesystem static files if not using B2 (for local dev)
-if not os.getenv("B2_APPLICATION_KEY_ID"):
+# Only mount filesystem static files if not using B2 or R2 (for local dev)
+if not os.getenv("B2_APPLICATION_KEY_ID") and not os.getenv("R2_ACCESS_KEY_ID"):
     app.mount("/files", StaticFiles(directory=str(DATA_DIR)), name="files")
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5433/epsteinbase")
@@ -464,8 +464,8 @@ async def list_local_images(page: int = 1, per_page: int = 1000, filter: Optiona
                         "file_path": file_path,
                         "thumbnail_path": thumb_path,
                         "source": source,
-                        "url": get_b2_url(file_path),
-                        "thumbnail_url": get_b2_url(thumb_path)
+                        "url": get_file_url(file_path) or get_b2_url(file_path),
+                        "thumbnail_url": get_file_url(thumb_path) or get_b2_url(thumb_path)
                     })
                 except Exception as e:
                     continue

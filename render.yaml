@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: epsteinbase-api
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements-api.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      # Database URL will be set automatically when you add PostgreSQL
+      # B2 credentials - set these in Render dashboard
+      # - key: B2_APPLICATION_KEY_ID
+      #   sync: false
+      # - key: B2_APPLICATION_KEY
+      #   sync: false
+      # - key: B2_BUCKET_NAME
+      #   value: Epsteinbase
+
+databases:
+  - name: epsteinbase-db
+    databaseName: epsteinbase
+    user: epsteinbase
+    plan: free  # Free for 90 days, then $7/month
+
+
