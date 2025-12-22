@@ -7,23 +7,35 @@ import os
 import json
 from pathlib import Path
 from glob import glob
+from .b2_client import get_b2_url, list_b2_files
 
 app = FastAPI(title="EpsteinBase API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000", "http://localhost:5175", "*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000", 
+        "http://localhost:5175",
+        "https://epsteinbase.xyz",
+        "https://www.epsteinbase.xyz",
+        "https://epsteinbase-*.vercel.app",  # Vercel preview deployments
+        "*"  # Allow all for now, can restrict later
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Serve extracted images/files statically
+# Serve extracted images/files statically (only if not using B2)
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
 DATA_DIR.mkdir(exist_ok=True)
 EXTRACTED_DIR = DATA_DIR / "extracted"
 THUMBNAIL_DIR = DATA_DIR / "thumbnails"
-app.mount("/files", StaticFiles(directory=str(DATA_DIR)), name="files")
+
+# Only mount filesystem static files if not using B2 (for local dev)
+if not os.getenv("B2_APPLICATION_KEY_ID"):
+    app.mount("/files", StaticFiles(directory=str(DATA_DIR)), name="files")
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5433/epsteinbase")
 
