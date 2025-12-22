@@ -2,17 +2,16 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install Rust and system dependencies
+# Install Rust and system dependencies (required for asyncpg and pydantic)
 RUN apt-get update && apt-get install -y \
     curl \
     build-essential \
-    && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable \
-    && export PATH="$HOME/.cargo/bin:$PATH" \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
 
-# Set Rust environment variables
+# Set Rust environment variables (must be set as ENV for subsequent RUN commands)
 ENV CARGO_HOME=/root/.cargo
-ENV RUSTUP_HOME=/root/.rustup
+ENV RUSTUP_HOME=/root/.rustup  
 ENV PATH="/root/.cargo/bin:${PATH}"
 
 # Copy requirements and install Python dependencies
