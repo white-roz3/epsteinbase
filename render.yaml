@@ -1,8 +1,10 @@
 services:
   - type: web
     name: epsteinbase-api
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install --upgrade pip setuptools wheel && pip install -r requirements-api.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PORT
         value: 10000
