@@ -3,7 +3,7 @@ services:
     name: epsteinbase-api
     env: python
     rootDir: backend
-    buildCommand: python3.11 -m pip install --upgrade pip && python3.11 -m pip install -r requirements-api.txt
+    buildCommand: python3.11 -m pip install --upgrade pip setuptools wheel && python3.11 -m pip install -r requirements-api.txt --prefer-binary
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PORT
