@@ -817,11 +817,19 @@ export default function App() {
     const detected_people = metadata.detected_people || [];
     const all_people = [...new Set([...people, ...detected_people])]; // Combine and dedupe
 
-    // Convert file_path to URL - prioritize local file over external URL
+    // Convert file_path to URL - prioritize curated (public folder) over API endpoint
     let fileUrl = null;
-    if (item.file_path) {
-      // Convert file_path to proper URL via /files endpoint
-      fileUrl = `${API_BASE}/files/${item.file_path}`;
+    if (item.url && (item.url.startsWith('/curated/') || item.url.startsWith('http'))) {
+      // Already a full URL (curated file or external)
+      fileUrl = item.url;
+    } else if (item.file_path) {
+      // Check if it's a curated path (starts with /curated/)
+      if (item.file_path.startsWith('/curated/')) {
+        fileUrl = item.file_path;
+      } else {
+        // Convert file_path to proper URL via /files endpoint
+        fileUrl = `${API_BASE}/files/${item.file_path}`;
+      }
     } else if (item.url) {
       // Fallback to external URL if no file_path
       fileUrl = item.url;
