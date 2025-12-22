@@ -4,12 +4,11 @@ services:
     env: python
     rootDir: backend
     buildCommand: |
-      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
-      source $HOME/.cargo/env
-      export CARGO_HOME="$HOME/.cargo"
-      export RUSTUP_HOME="$HOME/.rustup"
-      export PATH="$HOME/.cargo/bin:$PATH"
-      python3.11 -m pip install --upgrade pip setuptools wheel
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable && \
+      export CARGO_HOME="$HOME/.cargo" && \
+      export RUSTUP_HOME="$HOME/.rustup" && \
+      export PATH="$HOME/.cargo/bin:$PATH" && \
+      python3.11 -m pip install --upgrade pip setuptools wheel && \
       python3.11 -m pip install -r requirements-api.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
