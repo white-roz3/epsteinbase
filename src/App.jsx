@@ -236,7 +236,7 @@ function StatsBanner({ stats, useApi }) {
     { label: 'DOJ Documents', value: stats.doj || '4,055+', icon: FileText },
     { label: 'Videos', value: stats.videos || '2', icon: Video },
     { label: 'Audio Files', value: stats.audio || '11', icon: Music },
-    { label: 'Photos', value: stats.images || '95,000+', icon: Image },
+    { label: 'Photos', value: stats.images ? stats.images.toLocaleString() : '13,000+', icon: Image },
   ];
 
   return (
@@ -758,7 +758,18 @@ export default function App() {
         return res.json();
       })
       .then(data => {
-        setApiStats(data);
+        // Map API response to stats format
+        const mappedStats = {
+          total: data.total_documents || 0,
+          images: data.by_type?.image || data.total_documents || 0,
+          videos: data.by_type?.video || 0,
+          audio: data.by_type?.audio || 0,
+          emails: data.by_type?.email || 0,
+          documents: data.by_type?.document || 0,
+          doj: data.by_source?.['DOJ'] || 0,
+          ...data // Include any other stats from API
+        };
+        setApiStats(mappedStats);
       })
       .catch((err) => {
         console.error('API stats fetch failed:', err);
