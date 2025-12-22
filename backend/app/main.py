@@ -44,6 +44,24 @@ async def startup():
     try:
         app.state.pool = await asyncpg.create_pool(DATABASE_URL)
         app.state.db_connected = True
+        
+        # Auto-initialize schema if tables don't exist
+        async with app.state.pool.acquire() as conn:
+            tables = await conn.fetch("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'public' AND table_name = 'documents'
+            """)
+            
+            if not tables:
+                print("Database schema not found. Initializing...")
+                init_sql_path = Path(__file__).parent.parent / "init.sql"
+                if init_sql_path.exists():
+                    init_sql = init_sql_path.read_text()
+                    await conn.execute(init_sql)
+                    print("✓ Database schema initialized successfully")
+                else:
+                    print(f"Warning: init.sql not found at {init_sql_path}")
     except Exception as e:
         print(f"Warning: Could not connect to database: {e}")
         app.state.pool = None
