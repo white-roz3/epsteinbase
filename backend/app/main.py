@@ -420,7 +420,68 @@ async def root():
 
 @app.get("/api/files/images")
 async def list_local_images(page: int = 1, per_page: int = 1000, filter: Optional[str] = None):
-    """List images directly from filesystem"""
+    """List images from B2 if configured, otherwise from filesystem"""
+    # Check if B2 is configured
+    use_b2 = os.getenv("B2_APPLICATION_KEY_ID") and os.getenv("B2_BUCKET_NAME")
+    
+    if use_b2:
+        # Use B2 - list all files recursively
+        try:
+            all_b2_files = list_b2_files(prefix="extracted/", max_keys=50000)
+            
+            # Filter for image files only
+            image_files = [f for f in all_b2_files if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+            
+            # Filter logic for flightlogs vs regular images
+            if filter == "flightlogs":
+                image_files = [f for f in image_files if any(x in f.lower() for x in ["flight", "contact"])]
+            else:
+                image_files = [f for f in image_files if not any(x in f.lower() for x in ["flight", "contact"])]
+            
+            # Sort for consistent pagination
+            image_files = sorted(image_files)
+            
+            # Paginate
+            total = len(image_files)
+            start_idx = (page - 1) * per_page
+            end_idx = start_idx + per_page
+            paginated_files = image_files[start_idx:end_idx]
+            
+            # Build response
+            images = []
+            for file_path in paginated_files:
+                try:
+                    # Extract parent folder name for source
+                    source = Path(file_path).parent.name
+                    
+                    # Construct thumbnail path (assumes same structure under thumbnails/)
+                    thumb_path = file_path.replace("extracted/", "thumbnails/", 1)
+                    
+                    images.append({
+                        "id": abs(hash(file_path)) % (10**9),
+                        "title": Path(file_path).stem.replace("_", " ").replace("page", "Page").title(),
+                        "type": "image",
+                        "file_path": file_path,
+                        "thumbnail_path": thumb_path,
+                        "source": source,
+                        "url": get_b2_url(file_path),
+                        "thumbnail_url": get_b2_url(thumb_path)
+                    })
+                except Exception as e:
+                    continue
+            
+            return {
+                "results": images,
+                "total": total,
+                "page": page,
+                "per_page": per_page
+            }
+        except Exception as e:
+            print(f"Error listing B2 files: {e}")
+            # Fallback to empty if B2 fails
+            return {"results": [], "total": 0, "page": page, "per_page": per_page}
+    
+    # Fallback to filesystem (for local dev)
     if not EXTRACTED_DIR.exists():
         return {"results": [], "total": 0, "page": page, "per_page": per_page}
     
@@ -429,10 +490,8 @@ async def list_local_images(page: int = 1, per_page: int = 1000, filter: Optiona
     
     # Filter logic
     if filter == "flightlogs":
-        # Flight logs tab: include images from folders containing "flight" or "contact"
         image_files = [f for f in image_files if "flight" in f.parent.name.lower() or "contact" in f.parent.name.lower()]
     else:
-        # Regular images tab: exclude images from folders containing "flight" or "contact"
         image_files = [f for f in image_files if "flight" not in f.parent.name.lower() and "contact" not in f.parent.name.lower()]
     
     start_idx = (page - 1) * per_page
