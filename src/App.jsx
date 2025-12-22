@@ -895,8 +895,57 @@ export default function App() {
     }
   }, [activeTab]);
 
+  // Load curated files from public folder (Vercel static assets)
+  useEffect(() => {
+    // Load curated manifest for images/audio
+    fetch('/curated/manifest.json')
+      .then(res => res.json())
+      .then(manifest => {
+        console.log('Loaded curated manifest:', manifest);
+        
+        // Convert curated images to API format
+        const curatedImages = (manifest.images || []).map((img, idx) => ({
+          id: `curated_img_${idx}`,
+          title: img.title,
+          type: 'image',
+          source: 'DOJ',
+          file_path: img.path,
+          url: img.path, // Direct path to public folder
+          thumbnail: img.path
+        }));
+        
+        // Convert curated audio to API format
+        const curatedAudio = (manifest.audio || []).map((audio, idx) => ({
+          id: `curated_audio_${idx}`,
+          title: audio.title,
+          type: 'audio',
+          source: 'DOJ',
+          file_path: audio.path,
+          url: audio.path, // Direct path to public folder
+          date: 'July 24-25, 2025',
+          description: 'Maxwell proffer session recording'
+        }));
+        
+        setApiData(prev => ({
+          ...prev,
+          images: [...curatedImages, ...(prev.images || [])],
+          audio: [...curatedAudio, ...(prev.audio || [])]
+        }));
+      })
+      .catch(err => {
+        console.log('No curated manifest found (using API only):', err);
+      });
+  }, []);
+
   // Fetch documents from API when tab changes - always fetch
   useEffect(() => {
+    // Skip API fetch for images/audio if we have curated files (prioritize curated)
+    if ((activeTab === 'images' || activeTab === 'audio') && apiData[activeTab === 'images' ? 'images' : 'audio']?.length > 0) {
+      console.log(`[${activeTab}] Using curated files, skipping API fetch`);
+      setLoading(false);
+      return;
+    }
+    
     setLoading(true);
     
     // Use direct filesystem endpoint for images and flight logs tabs, regular API for others
@@ -923,13 +972,13 @@ export default function App() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       controller.abort();
-      setApiData({
-        videos: [],
-        audio: [],
-        images: [],
+      setApiData(prev => ({
+        videos: prev.videos || [],
+        audio: prev.audio || [],
+        images: prev.images || [],
         documents: [],
         emails: []
-      });
+      }));
       setLoading(false);
     }, 15000);
 
@@ -944,10 +993,10 @@ export default function App() {
         console.log(`[${activeTab}] API response:`, data);
         
         if (activeTab === 'images' || activeTab === 'flightlogs') {
-          // For images/flight logs tabs, replace images array
+          // For images/flight logs tabs, append to curated images (don't replace)
           const images = [];
           if (data.results && Array.isArray(data.results)) {
-            console.log(`[${activeTab}] Found ${data.results.length} images from filesystem`);
+            console.log(`[${activeTab}] Found ${data.results.length} images from API`);
             data.results.forEach(item => {
               try {
                 const transformed = transformApiItem({ ...item, type: 'image' });
@@ -957,8 +1006,11 @@ export default function App() {
               }
             });
           }
-          console.log(`[${activeTab}] Transformed ${images.length} images`);
-          setApiData(prev => ({ ...prev, images }));
+          console.log(`[${activeTab}] Transformed ${images.length} images from API`);
+          setApiData(prev => ({ 
+            ...prev, 
+            images: [...(prev.images || []), ...images] // Append API images to curated
+          }));
         } else {
           // For other tabs, use regular grouping
           const grouped = {

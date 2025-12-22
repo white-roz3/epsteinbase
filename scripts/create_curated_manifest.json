@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+"""
+Create a manifest.json file for curated files on Vercel
+"""
+import json
+from pathlib import Path
+
+PUBLIC_DIR = Path("public/curated")
+manifest = {
+    "images": [],
+    "audio": [],
+    "video": []
+}
+
+# List images
+images_dir = PUBLIC_DIR / "images"
+if images_dir.exists():
+    for img_file in sorted(images_dir.glob("*.png")) + sorted(images_dir.glob("*.jpg")) + sorted(images_dir.glob("*.jpeg")):
+        manifest["images"].append({
+            "filename": img_file.name,
+            "path": f"/curated/images/{img_file.name}",
+            "title": img_file.stem.replace("_", " ").replace("page", "Page").title()
+        })
+
+# List audio
+audio_dir = PUBLIC_DIR / "audio"
+if audio_dir.exists():
+    for audio_file in sorted(audio_dir.glob("*.mp3")) + sorted(audio_dir.glob("*.wav")) + sorted(audio_dir.glob("*.m4a")):
+        manifest["audio"].append({
+            "filename": audio_file.name,
+            "path": f"/curated/audio/{audio_file.name}",
+            "title": audio_file.stem.replace("_", " ").replace("%20", " ")
+        })
+
+# List video
+video_dir = PUBLIC_DIR / "video"
+if video_dir.exists():
+    for video_file in sorted(video_dir.glob("*.mp4")) + sorted(video_dir.glob("*.mov")):
+        manifest["video"].append({
+            "filename": video_file.name,
+            "path": f"/curated/video/{video_file.name}",
+            "title": video_file.stem.replace("_", " ").replace("%20", " ")
+        })
+
+# Save manifest
+manifest_path = PUBLIC_DIR / "manifest.json"
+with open(manifest_path, 'w') as f:
+    json.dump(manifest, f, indent=2)
+
+print(f"✅ Created manifest with:")
+print(f"  - {len(manifest['images'])} images")
+print(f"  - {len(manifest['audio'])} audio files")
+print(f"  - {len(manifest['video'])} video files")
+print(f"  Saved to: {manifest_path}")
+
