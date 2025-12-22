@@ -249,12 +249,6 @@ function StatsBanner({ stats, useApi }) {
               December 2025 DOJ Release • Searchable Archive
             </p>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="flex items-center gap-1.5 text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full whitespace-nowrap">
-              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-              Live Data
-            </span>
-          </div>
         </div>
         
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
@@ -1052,7 +1046,7 @@ export default function App() {
               <img 
                 src="/epsteinbase-logo.png" 
                 alt="EpsteinBase Logo" 
-                className="h-10 sm:h-[45px] w-auto"
+                className="h-12 sm:h-16 w-auto"
               />
             </div>
             
