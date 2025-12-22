@@ -3,13 +3,13 @@ services:
     name: epsteinbase-api
     env: python
     rootDir: backend
-    buildCommand: python3.11 -m pip install --upgrade pip setuptools wheel && python3.11 -m pip install -r requirements-api.txt --prefer-binary
+    buildCommand: pip install --upgrade pip setuptools wheel && pip install -r requirements-api.txt --only-binary :all: || pip install -r requirements-api.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PORT
         value: 10000
       - key: PYTHON_VERSION
-        value: 3.11.9
+        value: "3.11.9"
       # Database URL will be set automatically when you add PostgreSQL
       # B2 credentials - set these in Render dashboard
       # - key: B2_APPLICATION_KEY_ID
