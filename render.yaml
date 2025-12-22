@@ -3,7 +3,12 @@ services:
     name: epsteinbase-api
     env: python
     rootDir: backend
-    buildCommand: pip install --upgrade pip setuptools wheel && pip install -r requirements-api.txt --only-binary :all: || pip install -r requirements-api.txt
+    buildCommand: |
+      export CARGO_HOME="$HOME/.cargo"
+      export PATH="$CARGO_HOME/bin:$PATH"
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+      pip install --upgrade pip setuptools wheel
+      pip install -r requirements-api.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PORT
