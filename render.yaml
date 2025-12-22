@@ -1,7 +1,7 @@
 services:
   - type: web
     name: epsteinbase-api
-    env: python3.11
+    env: python
     rootDir: backend
     buildCommand: |
       curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
