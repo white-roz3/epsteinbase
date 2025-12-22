@@ -241,30 +241,30 @@ function StatsBanner({ stats, useApi }) {
 
   return (
     <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold">Epstein Files Database</h1>
-            <p className="text-slate-400 text-sm">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4">
+          <div className="flex-1">
+            <h1 className="text-xl sm:text-2xl font-bold">Epstein Files Database</h1>
+            <p className="text-slate-400 text-xs sm:text-sm mt-1">
               December 2025 DOJ Release • Searchable Archive
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1.5 text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className="flex items-center gap-1.5 text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full whitespace-nowrap">
               <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
               Live Data
             </span>
           </div>
         </div>
         
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
           {items.map((item, i) => (
-            <div key={i} className="bg-white/5 rounded-lg p-3 border border-white/10">
-              <div className="flex items-center gap-2 text-slate-400 text-xs mb-1">
-                <item.icon className="w-3.5 h-3.5" />
-                {item.label}
+            <div key={i} className="bg-white/5 rounded-lg p-2.5 sm:p-3 border border-white/10">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-slate-400 text-xs mb-1">
+                <item.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+                <span className="truncate">{item.label}</span>
               </div>
-              <div className="text-xl font-semibold">{item.value}</div>
+              <div className="text-lg sm:text-xl font-semibold truncate">{item.value}</div>
             </div>
           ))}
         </div>
@@ -649,61 +649,61 @@ function EmailModal({ email, onClose }) {
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-2 flex-wrap flex-1">
-              <span className={`text-sm px-3 py-1 rounded-full ${SOURCE_COLORS[email.source] || 'bg-gray-100 text-gray-600'}`}>
+        <div className="p-4 sm:p-6 border-b border-gray-200">
+          <div className="flex items-start justify-between mb-3 sm:mb-4">
+            <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
+              <span className={`text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-full ${SOURCE_COLORS[email.source] || 'bg-gray-100 text-gray-600'}`}>
                 {email.source?.replace(/_/g, ' ')}
               </span>
               {email.efta_id && (
-                <span className="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+                <span className="text-xs sm:text-sm bg-gray-100 text-gray-600 px-2 sm:px-3 py-1 rounded-full">
                   {email.efta_id}
                 </span>
               )}
             </div>
             <button 
               onClick={onClose} 
-              className="text-gray-400 hover:text-gray-600 text-2xl leading-none p-1"
+              className="text-gray-400 hover:text-gray-600 text-xl sm:text-2xl leading-none p-1 flex-shrink-0 ml-2"
             >
               ×
             </button>
           </div>
           
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+          <h2 className="text-lg sm:text-2xl font-semibold text-gray-900 mb-3 sm:mb-4 break-words">
             {subject || 'Untitled Email'}
           </h2>
           
           {/* Email metadata */}
-          <div className="space-y-2 text-sm">
+          <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
             {from && (
-              <div className="flex items-start gap-2">
-                <span className="font-medium text-gray-700 w-16">From:</span>
-                <span className="text-gray-900 flex-1">{from}</span>
+              <div className="flex flex-col sm:flex-row items-start gap-1 sm:gap-2">
+                <span className="font-medium text-gray-700 sm:w-16 flex-shrink-0">From:</span>
+                <span className="text-gray-900 flex-1 break-words">{from}</span>
               </div>
             )}
             {to && (
-              <div className="flex items-start gap-2">
-                <span className="font-medium text-gray-700 w-16">To:</span>
-                <span className="text-gray-900 flex-1">{to}</span>
+              <div className="flex flex-col sm:flex-row items-start gap-1 sm:gap-2">
+                <span className="font-medium text-gray-700 sm:w-16 flex-shrink-0">To:</span>
+                <span className="text-gray-900 flex-1 break-words">{to}</span>
               </div>
             )}
             {cc && (
-              <div className="flex items-start gap-2">
-                <span className="font-medium text-gray-700 w-16">CC:</span>
-                <span className="text-gray-900 flex-1">{cc}</span>
+              <div className="flex flex-col sm:flex-row items-start gap-1 sm:gap-2">
+                <span className="font-medium text-gray-700 sm:w-16 flex-shrink-0">CC:</span>
+                <span className="text-gray-900 flex-1 break-words">{cc}</span>
               </div>
             )}
             {emailDate && (
-              <div className="flex items-start gap-2">
-                <span className="font-medium text-gray-700 w-16">Date:</span>
-                <span className="text-gray-900 flex-1">{emailDate}</span>
+              <div className="flex flex-col sm:flex-row items-start gap-1 sm:gap-2">
+                <span className="font-medium text-gray-700 sm:w-16 flex-shrink-0">Date:</span>
+                <span className="text-gray-900 flex-1 break-words">{emailDate}</span>
               </div>
             )}
           </div>
         </div>
         
         {/* Email body */}
-        <div className="p-6 overflow-auto flex-1">
+        <div className="p-4 sm:p-6 overflow-auto flex-1">
           <div className="prose max-w-none">
             <pre className="whitespace-pre-wrap font-sans text-gray-700 leading-relaxed">
               {body}
@@ -1045,27 +1045,27 @@ export default function App() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 py-3 sm:py-4">
             {/* Logo */}
-            <div className="flex items-center flex-shrink-0">
+            <div className="flex items-center flex-shrink-0 w-full sm:w-auto justify-center sm:justify-start">
               <img 
                 src="/epsteinbase-logo.png" 
                 alt="EpsteinBase Logo" 
-                className="h-[45px] w-auto"
+                className="h-10 sm:h-[45px] w-auto"
               />
             </div>
             
             {/* Search */}
-            <div className="w-full max-w-2xl ml-4">
+            <div className="w-full sm:w-full sm:max-w-2xl sm:ml-4">
               <div className="relative">
-                <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search files, documents, names..."
-                  className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2 sm:py-2.5 text-sm sm:text-base bg-gray-100 rounded-full border-0 focus:bg-white focus:ring-2 focus:ring-slate-900 transition-all"
+                  placeholder="Search..."
+                  className="w-full pl-9 pr-3 py-2 text-sm bg-gray-100 rounded-full border-0 focus:bg-white focus:ring-2 focus:ring-slate-900 transition-all sm:pl-10 sm:pr-4 sm:py-2.5 sm:text-base"
                 />
               </div>
             </div>
@@ -1077,9 +1077,9 @@ export default function App() {
       <StatsBanner stats={stats} useApi={useApi} />
 
       {/* Tabs */}
-      <div className="bg-white border-b border-gray-200 sticky top-[73px] sm:top-16 z-40">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
-          <nav className="flex gap-1 -mb-px overflow-x-auto scrollbar-hide">
+      <div className="bg-white border-b border-gray-200 sticky top-[73px] sm:top-[105px] md:top-16 z-40">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
+          <nav className="flex gap-0.5 sm:gap-1 -mb-px overflow-x-auto scrollbar-hide pb-px">
             {TABS.map(tab => {
               const Icon = tab.icon;
               const count = stats[tab.id] || stats.total;
@@ -1088,16 +1088,16 @@ export default function App() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-all ${
+                  className={`flex items-center gap-1 sm:gap-1.5 md:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-all ${
                     activeTab === tab.id
                       ? 'text-slate-900 border-slate-900'
                       : 'text-gray-500 border-transparent hover:text-gray-900 hover:border-gray-300'
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  <span className="hidden xs:inline">{tab.label}</span>
-                  <span className="xs:hidden">{tab.label.split(' ')[0]}</span>
-                  <span className={`text-xs px-1.5 py-0.5 rounded-full transition-colors ${
+                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
+                  <span className={`text-xs px-1 sm:px-1.5 py-0.5 rounded-full transition-colors flex-shrink-0 ${
                     activeTab === tab.id ? 'bg-slate-900 text-white' : 'bg-gray-100 text-gray-500'
                   }`}>
                     {count}
@@ -1261,30 +1261,30 @@ export default function App() {
       {/* Image Modal/Lightbox */}
       {selectedImage && (
         <div 
-          className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-2 sm:p-4"
           onClick={() => setSelectedImage(null)}
         >
           <button
-            onClick={() => setSelectedImage(null)}
-            className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors z-10 bg-black/50 rounded-full p-2"
+            onClick={(e) => { e.stopPropagation(); setSelectedImage(null); }}
+            className="absolute top-2 right-2 sm:top-4 sm:right-4 text-white hover:text-gray-300 transition-colors z-10 bg-black/70 hover:bg-black/90 rounded-full p-2 sm:p-2.5"
             aria-label="Close"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
           <div 
-            className="max-w-7xl max-h-full w-full h-full flex items-center justify-center"
+            className="max-w-7xl w-full h-full flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
             <img 
               src={selectedImage.url || `${API_BASE}/files/${selectedImage.file_path}`}
               alt={selectedImage.title}
-              className="max-w-full max-h-full object-contain"
+              className="max-w-full max-h-[90vh] sm:max-h-full object-contain"
             />
           </div>
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-center bg-black/70 px-4 py-2 rounded-lg max-w-2xl">
-            <h3 className="font-semibold">{selectedImage.title}</h3>
+          <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-white text-center bg-black/80 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-2 rounded-lg max-w-[calc(100%-1rem)] sm:max-w-2xl">
+            <h3 className="font-semibold text-sm sm:text-base">{selectedImage.title}</h3>
             {selectedImage.description && (
-              <p className="text-sm text-gray-300 mt-1">{selectedImage.description}</p>
+              <p className="text-xs sm:text-sm text-gray-300 mt-1 line-clamp-2">{selectedImage.description}</p>
             )}
           </div>
         </div>
@@ -1297,23 +1297,23 @@ export default function App() {
 
       {/* Footer */}
       <footer className="bg-slate-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
             <div className="text-center md:text-left">
               <div className="flex items-center gap-2 justify-center md:justify-start mb-2">
                 <Database className="w-5 h-5" />
                 <span className="font-bold">EpsteinBase</span>
               </div>
-              <p className="text-sm text-slate-400">
+              <p className="text-xs sm:text-sm text-slate-400 max-w-md">
                 Public records aggregator. All documents from official government releases.
               </p>
             </div>
-            <div className="flex gap-6 text-sm">
+            <div className="flex flex-wrap gap-3 sm:gap-4 md:gap-6 text-xs sm:text-sm justify-center md:justify-end">
               <a 
                 href="https://www.justice.gov/epstein" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-slate-400 hover:text-white transition-colors"
+                className="text-slate-400 hover:text-white transition-colors whitespace-nowrap"
               >
                 DOJ Library
               </a>
@@ -1321,7 +1321,7 @@ export default function App() {
                 href="https://oversight.house.gov" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-slate-400 hover:text-white transition-colors"
+                className="text-slate-400 hover:text-white transition-colors whitespace-nowrap"
               >
                 House Oversight
               </a>
@@ -1329,7 +1329,7 @@ export default function App() {
                 href="https://archive.org/details/combined-all-epstein-files" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-slate-400 hover:text-white transition-colors"
+                className="text-slate-400 hover:text-white transition-colors whitespace-nowrap"
               >
                 Internet Archive
               </a>
@@ -1337,7 +1337,7 @@ export default function App() {
                 href="https://huggingface.co/datasets/tensonaut/EPSTEIN_FILES_20K" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-slate-400 hover:text-white transition-colors"
+                className="text-slate-400 hover:text-white transition-colors whitespace-nowrap"
               >
                 Dataset
               </a>
