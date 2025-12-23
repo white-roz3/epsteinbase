@@ -32,11 +32,12 @@ async def ingest_from_r2_async(conn: asyncpg.Connection):
             if "flight" in file_path.lower() or "contact" in file_path.lower():
                 source = "DOJ"
             
+            # Don't set description - let frontend number them or use metadata
             await conn.execute("""
-                INSERT INTO documents (title, source, type, file_path, description)
-                VALUES ($1, $2, $3, $4, $5)
+                INSERT INTO documents (title, source, type, file_path)
+                VALUES ($1, $2, $3, $4)
                 ON CONFLICT DO NOTHING
-            """, title, source, doc_type, file_path, f"Image from {source}")
+            """, title, source, doc_type, file_path)
             inserted += 1
         except Exception as e:
             print(f"Error inserting {file_path}: {e}")

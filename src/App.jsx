@@ -376,9 +376,10 @@ function AudioCard({ item }) {
           )}
           
           {/* Audio Player */}
-          {audioUrl && (
+          {audioUrl ? (
             <div className="mb-3">
               <audio
+                key={audioUrl} // Force re-render if URL changes
                 src={audioUrl}
                 preload="metadata"
                 className="w-full h-9"
@@ -388,12 +389,16 @@ function AudioCard({ item }) {
                   outline: 'none'
                 }}
                 onError={(e) => {
-                  console.error('Audio failed to load:', audioUrl);
+                  console.error('Audio failed to load:', audioUrl, e);
                 }}
+                onLoadStart={() => console.log('Audio loading:', audioUrl)}
+                onCanPlay={() => console.log('Audio can play:', audioUrl)}
               >
                 Your browser does not support the audio element.
               </audio>
             </div>
+          ) : (
+            <div className="mb-3 text-xs text-gray-500">Audio URL not available</div>
           )}
           
           <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
@@ -876,14 +881,18 @@ export default function App() {
       thumbnailUrl = fileUrl;
     }
 
-    // Generate better title/caption for images - only replace actual filenames
+    // Generate better title/caption for images
     let title = item.title;
     if ((item.type === 'image' || item.type === 'photo') && title) {
-      // Only replace if it's clearly a filename pattern (not just any title)
+      // Check if description is generic like "Image from R2" or "Image from DOJ"
+      const genericDesc = item.description && /^Image from (R2|DOJ|B2)$/i.test(item.description.trim());
+      
+      // Only replace if it's a filename pattern or has generic description
       const isFilenamePattern = /^(page_\d+|Page \d+|.*\.(png|jpg|jpeg|gif|pdf)$)/i.test(title);
-      if (isFilenamePattern) {
-        // Use description if available
-        if (item.description && item.description.trim()) {
+      
+      if (isFilenamePattern || genericDesc) {
+        // Skip generic descriptions - prioritize other sources
+        if (!genericDesc && item.description && item.description.trim() && !/^Image from/i.test(item.description.trim())) {
           title = item.description.trim();
         }
         // Or use context
@@ -903,9 +912,9 @@ export default function App() {
         else if (metadata.objects && metadata.objects.length > 0) {
           title = metadata.objects.slice(0, 3).join(', ');
         }
-        // Fallback to a generic title
+        // Fallback to numbered title
         else {
-          title = item.efta_id || `Image ${item.id}`;
+          title = `Image #${item.id}`;
         }
       }
     }
@@ -1137,7 +1146,7 @@ export default function App() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search..."
+                  placeholder={activeTab === 'images' ? "Search images or people (e.g., Michael Jackson)..." : "Search..."}
                   className="w-full pl-9 pr-3 py-2 text-sm bg-gray-100 rounded-full border-0 focus:bg-white focus:ring-2 focus:ring-slate-900 transition-all sm:pl-10 sm:pr-4 sm:py-2.5 sm:text-base"
                 />
               </div>
@@ -1262,11 +1271,31 @@ export default function App() {
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
               {data.images
                 .filter(item => {
-                  if (!selectedPerson) return true;
-                  const itemPeople = (item.people || []).filter(p => p);
-                  const metadataPeople = (item.metadata?.detected_people || []).filter(p => p);
-                  const allPeople = [...itemPeople, ...metadataPeople].map(p => String(p).toLowerCase());
-                  return allPeople.includes(String(selectedPerson.name || '').toLowerCase());
+                  // Filter by selected person if set
+                  if (selectedPerson) {
+                    const itemPeople = (item.people || []).filter(p => p);
+                    const metadataPeople = (item.metadata?.detected_people || []).filter(p => p);
+                    const allPeople = [...itemPeople, ...metadataPeople].map(p => String(p).toLowerCase());
+                    return allPeople.includes(String(selectedPerson.name || '').toLowerCase());
+                  }
+                  
+                  // Filter by search query (searches title, description, and people)
+                  if (searchQuery && searchQuery.trim()) {
+                    const query = searchQuery.trim().toLowerCase();
+                    const itemPeople = (item.people || []).filter(p => p);
+                    const metadataPeople = (item.metadata?.detected_people || []).filter(p => p);
+                    const allPeople = [...itemPeople, ...metadataPeople].map(p => String(p).toLowerCase());
+                    
+                    // Search in title, description, context, and people
+                    const titleMatch = (item.title || '').toLowerCase().includes(query);
+                    const descMatch = (item.description || '').toLowerCase().includes(query);
+                    const contextMatch = (item.context || '').toLowerCase().includes(query);
+                    const peopleMatch = allPeople.some(p => p.includes(query));
+                    
+                    return titleMatch || descMatch || contextMatch || peopleMatch;
+                  }
+                  
+                  return true;
                 })
                 .sort((a, b) => {
                   // Sort images with people to the top
