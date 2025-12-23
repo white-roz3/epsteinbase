@@ -1004,53 +1004,34 @@ export default function App() {
         clearTimeout(timeoutId);
         console.log(`[${activeTab}] API response:`, data);
         
-        if (activeTab === 'images' || activeTab === 'flightlogs') {
-          // For images/flight logs tabs, append to curated images (don't replace)
-          const images = [];
-          if (data.results && Array.isArray(data.results)) {
-            console.log(`[${activeTab}] Found ${data.results.length} images from API`);
-            data.results.forEach(item => {
-              try {
-                const transformed = transformApiItem({ ...item, type: 'image' });
-                images.push(transformed);
-              } catch (e) {
-                console.error('Error transforming item:', e, item);
-              }
-            });
-          }
-          console.log(`[${activeTab}] Transformed ${images.length} images from API`);
-          setApiData(prev => ({ 
-            ...prev, 
-            images: [...(prev.images || []), ...images] // Append API images to curated
-          }));
-        } else {
-          // For other tabs, use regular grouping
-          const grouped = {
-            videos: [],
-            audio: [],
-            images: [],
-            documents: [],
-            emails: []
-          };
-          
-          if (data.results && Array.isArray(data.results)) {
-            data.results.forEach(item => {
-              try {
-                const transformed = transformApiItem(item);
-                const type = item.type || 'document';
-                if (type === 'video') grouped.videos.push(transformed);
-                else if (type === 'audio') grouped.audio.push(transformed);
-                else if (type === 'image') grouped.images.push(transformed);
-                else if (type === 'email') grouped.emails.push(transformed);
-                else grouped.documents.push(transformed);
-              } catch (e) {
-                console.error('Error transforming item:', e);
-              }
-            });
-          }
-          
-          setApiData(grouped);
+        // Group items by type
+        const grouped = {
+          videos: [],
+          audio: [],
+          images: [],
+          documents: [],
+          emails: []
+        };
+        
+        if (data.results && Array.isArray(data.results)) {
+          data.results.forEach(item => {
+            try {
+              const transformed = transformApiItem(item);
+              const type = item.type || 'document';
+              // Group items by their actual type
+              if (type === 'video') grouped.videos.push(transformed);
+              else if (type === 'audio') grouped.audio.push(transformed);
+              else if (type === 'image') grouped.images.push(transformed);
+              else if (type === 'email') grouped.emails.push(transformed);
+              else grouped.documents.push(transformed);
+            } catch (e) {
+              console.error('Error transforming item:', e);
+            }
+          });
         }
+        
+        // Replace with new data (this ensures videos and images are properly separated)
+        setApiData(grouped);
         setLoading(false);
       })
       .catch(err => {
