@@ -1145,7 +1145,23 @@ export default function App() {
           <nav className="flex gap-0.5 sm:gap-1 -mb-px overflow-x-auto scrollbar-hide pb-px">
             {TABS.map(tab => {
               const Icon = tab.icon;
-              const count = stats[tab.id] || stats.total;
+              // Get count for each tab type
+              let count = 0;
+              if (tab.id === 'images') {
+                count = stats.images || 0;
+              } else if (tab.id === 'videos') {
+                count = stats.videos || 0;
+              } else if (tab.id === 'audio') {
+                count = stats.audio || 0;
+              } else if (tab.id === 'flightlogs') {
+                count = stats.flightlogs || 0;
+              } else if (tab.id === 'emails') {
+                count = stats.emails || 0;
+              } else if (tab.id === 'documents') {
+                count = stats.documents || 0;
+              } else {
+                count = stats.total || 0;
+              }
               
               return (
                 <button
@@ -1345,9 +1361,21 @@ export default function App() {
             />
           </div>
           <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-white text-center bg-black/80 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-2 rounded-lg max-w-[calc(100%-1rem)] sm:max-w-2xl">
-            <h3 className="font-semibold text-sm sm:text-base">{selectedImage.title}</h3>
-            {selectedImage.description && (
+            <h3 className="font-semibold text-sm sm:text-base">{selectedImage.title || 'Untitled Image'}</h3>
+            {selectedImage.description && selectedImage.description !== 'Image from R2' && (
               <p className="text-xs sm:text-sm text-gray-300 mt-1 line-clamp-2">{selectedImage.description}</p>
+            )}
+            {selectedImage.context && (
+              <p className="text-xs text-gray-400 mt-1 line-clamp-2">{selectedImage.context}</p>
+            )}
+            {selectedImage.people && selectedImage.people.length > 0 && (
+              <div className="flex flex-wrap gap-1 justify-center mt-1">
+                {selectedImage.people.slice(0, 5).map((person, i) => (
+                  <span key={i} className="text-xs bg-blue-500/30 text-blue-200 px-2 py-0.5 rounded">
+                    {person}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
         </div>

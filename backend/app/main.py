@@ -105,8 +105,13 @@ async def get_stats():
             GROUP BY source
         """)
         
-        # Calculate flight logs count (includes both flight and contact book images)
-        flightlog_count = len([f for f in EXTRACTED_DIR.glob("**/*.png") if ("flight" in f.parent.name.lower() or "contact" in f.parent.name.lower())]) if EXTRACTED_DIR.exists() else 0
+        # Calculate flight logs count from database (images with "flight" or "contact" in file_path)
+        flightlog_count = await conn.fetchval("""
+            SELECT COUNT(*) 
+            FROM documents 
+            WHERE type = 'image' 
+            AND (LOWER(file_path) LIKE '%flight%' OR LOWER(file_path) LIKE '%contact%')
+        """) or 0
         
         return {
             "total_documents": total,
