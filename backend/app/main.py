@@ -647,6 +647,20 @@ async def ingest_emails_endpoint():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/admin/upload-emails-from-db")
+async def upload_emails_from_db_endpoint(db_path: Optional[str] = Form(None)):
+    """Admin endpoint to upload emails from offline SQLite database"""
+    if not app.state.pool:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    try:
+        async with app.state.pool.acquire() as conn:
+            from .upload_emails_from_db import upload_emails_from_db_async
+            result = await upload_emails_from_db_async(conn, db_path)
+            return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/admin/fix-urls")
 async def fix_urls_endpoint():
     """Admin endpoint to fix broken image URLs by reconstructing from file_path"""
