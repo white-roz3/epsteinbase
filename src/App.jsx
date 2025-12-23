@@ -1416,7 +1416,9 @@ export default function App() {
               alt={selectedImage.title || 'Image'}
               className="max-w-full max-h-[90vh] sm:max-h-full object-contain"
               loading="eager"
-              crossOrigin="anonymous"
+              onError={(e) => {
+                console.error('Image modal failed to load:', selectedImage.url, selectedImage.id);
+              }}
             />
           </div>
           <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-white text-center bg-black/80 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-2 rounded-lg max-w-[calc(100%-1rem)] sm:max-w-2xl">
