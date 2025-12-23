@@ -92,10 +92,17 @@ async def get_stats():
     async with app.state.pool.acquire() as conn:
         total = await conn.fetchval("SELECT COUNT(*) FROM documents")
         
+        # Get counts by type, excluding flight logs from image count
         by_type = await conn.fetch("""
-            SELECT type, COUNT(*) as count 
+            SELECT 
+                type,
+                COUNT(*) as count
             FROM documents 
-            WHERE type IS NOT NULL 
+            WHERE type IS NOT NULL
+            AND NOT (
+                type = 'image' 
+                AND (LOWER(file_path) LIKE '%flight%' OR LOWER(file_path) LIKE '%contact%')
+            )
             GROUP BY type
         """)
         
