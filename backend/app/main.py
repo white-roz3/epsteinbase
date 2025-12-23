@@ -631,3 +631,67 @@ async def ingest_r2_endpoint():
             return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/admin/fix-urls")
+async def fix_urls_endpoint():
+    """Admin endpoint to fix broken image URLs by reconstructing from file_path"""
+    if not app.state.pool:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    updated = 0
+    thumb_updated = 0
+    
+    try:
+        async with app.state.pool.acquire() as conn:
+            # Fix main URLs
+            rows = await conn.fetch("""
+                SELECT id, file_path, url, type
+                FROM documents
+                WHERE type = 'image'
+                AND (url IS NULL OR url NOT LIKE 'http%')
+                AND file_path IS NOT NULL
+            """)
+            
+            for row in rows:
+                try:
+                    new_url = get_file_url(row['file_path']) or get_b2_url(row['file_path'])
+                    if new_url:
+                        await conn.execute("""
+                            UPDATE documents
+                            SET url = $1
+                            WHERE id = $2
+                        """, new_url, row['id'])
+                        updated += 1
+                except Exception as e:
+                    print(f"Error updating ID {row['id']}: {e}")
+            
+            # Fix thumbnail URLs
+            thumb_rows = await conn.fetch("""
+                SELECT id, thumbnail_path
+                FROM documents
+                WHERE type = 'image'
+                AND thumbnail_path IS NOT NULL
+                AND (thumbnail_url IS NULL OR thumbnail_url NOT LIKE 'http%')
+            """)
+            
+            for row in thumb_rows:
+                try:
+                    new_thumb_url = get_file_url(row['thumbnail_path']) or get_b2_url(row['thumbnail_path'])
+                    if new_thumb_url:
+                        await conn.execute("""
+                            UPDATE documents
+                            SET thumbnail_url = $1
+                            WHERE id = $2
+                        """, new_thumb_url, row['id'])
+                        thumb_updated += 1
+                except Exception as e:
+                    print(f"Error updating thumbnail for ID {row['id']}: {e}")
+        
+        return {
+            "success": True,
+            "urls_fixed": updated,
+            "thumbnails_fixed": thumb_updated,
+            "total_fixed": updated + thumb_updated
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
