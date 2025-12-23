@@ -1026,7 +1026,6 @@ export default function App() {
         // Replace with new data (this ensures videos and images are properly separated)
         setApiData(grouped);
         setLoading(false);
-        setLoading(false);
       })
       .catch(err => {
         clearTimeout(timeoutId);
