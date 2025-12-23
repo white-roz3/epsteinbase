@@ -195,12 +195,16 @@ async def get_documents(
                     pass
             
             # Construct thumbnail URL from R2 if thumbnail_path exists
+            # If no thumbnail_path, use the main image URL as thumbnail
             thumbnail_url = row['thumbnail_path']
             if thumbnail_url:
                 try:
                     thumbnail_url = get_file_url(thumbnail_url) or get_b2_url(thumbnail_url)
                 except:
                     pass
+            elif file_url and row['type'] == 'image':
+                # Use main image as thumbnail if no thumbnail available
+                thumbnail_url = file_url
             
             item = {
                 "id": row['id'],
@@ -216,6 +220,7 @@ async def get_documents(
                 "url": file_url,
                 "file_path": row['file_path'],
                 "thumbnail_path": thumbnail_url or row['thumbnail_path'],
+                "thumbnail_url": thumbnail_url,  # Add thumbnail_url for frontend convenience
                 "duration": row['duration'],
                 "location": row['location'],
                 "downloadable": row['downloadable'],
@@ -263,12 +268,16 @@ async def get_document(doc_id: int):
                 pass
         
         # Construct thumbnail URL from R2 if thumbnail_path exists
+        # If no thumbnail_path, use the main image URL as thumbnail
         thumbnail_url = row['thumbnail_path']
         if thumbnail_url and not (thumbnail_url.startswith('http') or thumbnail_url.startswith('/')):
             try:
                 thumbnail_url = get_file_url(thumbnail_url) or get_b2_url(thumbnail_url)
             except:
                 pass
+        elif file_url and row['type'] == 'image':
+            # Use main image as thumbnail if no thumbnail available
+            thumbnail_url = file_url
         
         return {
             "id": row['id'],
@@ -284,6 +293,7 @@ async def get_document(doc_id: int):
             "url": file_url,
             "file_path": row['file_path'],
             "thumbnail_path": thumbnail_url or row['thumbnail_path'],
+            "thumbnail_url": thumbnail_url,  # Add thumbnail_url for frontend convenience
             "duration": row['duration'],
             "location": row['location'],
             "downloadable": row['downloadable'],

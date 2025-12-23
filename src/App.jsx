@@ -952,15 +952,8 @@ export default function App() {
       });
   }, []);
 
-  // Fetch documents from API when tab changes - always fetch
+  // Fetch documents from API when tab changes
   useEffect(() => {
-    // Skip API fetch for images/audio if we have curated files (prioritize curated)
-    if ((activeTab === 'images' || activeTab === 'audio') && apiData[activeTab === 'images' ? 'images' : 'audio']?.length > 0) {
-      console.log(`[${activeTab}] Using curated files, skipping API fetch`);
-      setLoading(false);
-      return;
-    }
-    
     setLoading(true);
     
     // Use /api/documents endpoint for all tabs (images, videos, audio, etc.)
@@ -1025,13 +1018,14 @@ export default function App() {
               else if (type === 'email') grouped.emails.push(transformed);
               else grouped.documents.push(transformed);
             } catch (e) {
-              console.error('Error transforming item:', e);
+              console.error('Error transforming item:', e, item);
             }
           });
         }
         
         // Replace with new data (this ensures videos and images are properly separated)
         setApiData(grouped);
+        setLoading(false);
         setLoading(false);
       })
       .catch(err => {
