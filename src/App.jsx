@@ -835,9 +835,12 @@ export default function App() {
       }
     }
 
-    // Convert thumbnail_path to URL - prioritize API-provided thumbnail_path if it's a full URL
+    // Convert thumbnail_path to URL - prioritize API-provided thumbnail_url or thumbnail_path
     let thumbnailUrl = null;
-    if (item.thumbnail_path && item.thumbnail_path.startsWith('http')) {
+    // First check thumbnail_url field (convenience field from backend)
+    if (item.thumbnail_url && (item.thumbnail_url.startsWith('http') || item.thumbnail_url.startsWith('/'))) {
+      thumbnailUrl = item.thumbnail_url;
+    } else if (item.thumbnail_path && item.thumbnail_path.startsWith('http')) {
       // Use R2/external thumbnail URL if provided by API
       thumbnailUrl = item.thumbnail_path;
     } else if (item.thumbnail_path && item.thumbnail_path.startsWith('/curated/')) {
@@ -849,8 +852,8 @@ export default function App() {
     } else if (item.thumbnail && item.thumbnail.startsWith('http')) {
       // Fallback to thumbnail field if it's a full URL
       thumbnailUrl = item.thumbnail;
-    } else if (fileUrl) {
-      // Fallback to main image URL if no thumbnail available
+    } else if (fileUrl && (item.type === 'image' || item.type === 'photo')) {
+      // Fallback to main image URL if no thumbnail available (for images only)
       thumbnailUrl = fileUrl;
     }
 
