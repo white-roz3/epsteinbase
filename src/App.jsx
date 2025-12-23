@@ -384,7 +384,6 @@ function AudioCard({ item }) {
                 preload="metadata"
                 className="w-full h-9"
                 controls
-                controlsList="nodownload"
                 style={{
                   outline: 'none'
                 }}
