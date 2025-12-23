@@ -66,14 +66,19 @@ def get_storage_client():
 def get_file_url(file_path: str) -> str:
     """
     Generate public URL for a file path
-    file_path should be relative (e.g., "extracted/folder/image.png")
+    file_path should be relative (e.g., "extracted/folder/image.png" or "epsteinbase/page_03326.png")
     Works with both B2 and R2
+    For R2, the bucket name prefix in file_path is valid (files are stored with bucket name prefix)
     """
     if not file_path or not PUBLIC_URL:
         return None
     
     # Remove leading slash if present
     file_path = file_path.lstrip('/')
+    
+    # For R2, file_path may already include bucket name (e.g., "epsteinbase/page_03326.png")
+    # The public URL format is: https://pub-{ACCOUNT_ID}.r2.dev/{file_path}
+    # So we can use file_path as-is (it already has the bucket name if needed)
     
     # Construct public URL
     return f"{PUBLIC_URL.rstrip('/')}/{file_path}"
