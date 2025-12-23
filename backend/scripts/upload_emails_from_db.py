@@ -4,22 +4,42 @@ import asyncio
 import asyncpg
 import sqlite3
 import os
+import sys
 import json
 from pathlib import Path
 from datetime import datetime
 
-# Database paths
-OFFLINE_DB_PATH = os.getenv("OFFLINE_DB_PATH", "emails.db")  # Path to your offline SQLite database
+# Database paths - can be set via command line argument, env var, or default
+OFFLINE_DB_PATH = None
+if len(sys.argv) > 1:
+    OFFLINE_DB_PATH = sys.argv[1]
+else:
+    OFFLINE_DB_PATH = os.getenv("OFFLINE_DB_PATH", "emails.db")
+
 RENDER_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5433/epsteinbase")
 
 async def upload_emails_from_sqlite():
     """Read emails from SQLite and upload to PostgreSQL"""
     
     # Check if offline DB exists
-    if not Path(OFFLINE_DB_PATH).exists():
-        print(f"Error: Database file not found: {OFFLINE_DB_PATH}")
-        print(f"Please set OFFLINE_DB_PATH environment variable to your database file path")
-        return
+    db_path = Path(OFFLINE_DB_PATH)
+    if not db_path.exists():
+        # Try relative to current directory
+        db_path = Path.cwd() / OFFLINE_DB_PATH
+        if not db_path.exists():
+            # Try in data directory
+            db_path = Path(__file__).parent.parent.parent / "data" / OFFLINE_DB_PATH
+            if not db_path.exists():
+                print(f"Error: Database file not found: {OFFLINE_DB_PATH}")
+                print(f"Tried:")
+                print(f"  - {OFFLINE_DB_PATH}")
+                print(f"  - {Path.cwd() / OFFLINE_DB_PATH}")
+                print(f"  - {Path(__file__).parent.parent.parent / 'data' / OFFLINE_DB_PATH}")
+                print(f"\nUsage: python3 upload_emails_from_db.py <path_to_database.db>")
+                print(f"Or set OFFLINE_DB_PATH environment variable")
+                return
+    
+    OFFLINE_DB_PATH = str(db_path)
     
     print(f"Connecting to offline database: {OFFLINE_DB_PATH}")
     offline_db = sqlite3.connect(OFFLINE_DB_PATH)
