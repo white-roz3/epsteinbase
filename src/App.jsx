@@ -963,25 +963,22 @@ export default function App() {
     
     setLoading(true);
     
-    // Use direct filesystem endpoint for images and flight logs tabs, regular API for others
-    const apiUrl = (activeTab === 'images' || activeTab === 'flightlogs')
-      ? `${API_BASE}/api/files/images?page=1&per_page=1000${activeTab === 'flightlogs' ? '&filter=flightlogs' : ''}`
-      : (() => {
-          const params = new URLSearchParams();
-          if (activeTab !== 'all') {
-            const typeMap = {
-              'videos': 'video',
-              'audio': 'audio',
-              'images': 'image',
-              'emails': 'email',
-              'documents': 'document'
-            };
-            params.set('type', typeMap[activeTab] || activeTab);
-          }
-          params.set('page', '1');
-          params.set('per_page', '1000');
-          return `${API_BASE}/api/documents?${params}`;
-        })();
+    // Use /api/documents endpoint for all tabs (images, videos, audio, etc.)
+    const params = new URLSearchParams();
+    if (activeTab !== 'all') {
+      const typeMap = {
+        'videos': 'video',
+        'audio': 'audio',
+        'images': 'image',
+        'emails': 'email',
+        'documents': 'document',
+        'flightlogs': 'image' // Flight logs are images, filtered by source
+      };
+      params.set('type', typeMap[activeTab] || activeTab);
+    }
+    params.set('page', '1');
+    params.set('per_page', '1000');
+    const apiUrl = `${API_BASE}/api/documents?${params}`;
 
     // Add timeout to prevent infinite loading
     const controller = new AbortController();
