@@ -1450,7 +1450,10 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-slate-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
+          <div className="flex flex-col items-center gap-4 sm:gap-6">
+            <div className="text-center">
+              <p className="text-sm sm:text-base font-mono">CA: 8Hkv2g4ouuXWKdLVebK7QxHvQRkcMFS8VaU3uz1pump</p>
+            </div>
             <div className="text-center md:text-left">
               <div className="flex items-center gap-2 justify-center md:justify-start mb-2">
                 <Database className="w-5 h-5" />
