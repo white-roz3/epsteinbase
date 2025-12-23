@@ -381,7 +381,7 @@ function AudioCard({ item }) {
               <audio
                 key={audioUrl} // Force re-render if URL changes
                 src={audioUrl}
-                preload="metadata"
+                preload="auto"
                 className="w-full h-9"
                 controls
                 crossOrigin="anonymous"
@@ -391,8 +391,11 @@ function AudioCard({ item }) {
                 onError={(e) => {
                   console.error('Audio failed to load:', audioUrl, e);
                 }}
-                onLoadStart={() => console.log('Audio loading:', audioUrl)}
-                onCanPlay={() => console.log('Audio can play:', audioUrl)}
+                onLoadedData={(e) => {
+                  console.log('Audio loaded:', audioUrl);
+                  // Auto-enable play button when loaded
+                  e.target.controls = true;
+                }}
               >
                 Your browser does not support the audio element.
               </audio>
@@ -1220,107 +1223,6 @@ export default function App() {
           </div>
         )}
         
-        {/* Videos Section */}
-        {data.videos && data.videos.length > 0 && (
-          <section className="mb-12">
-            <SectionHeader 
-              icon={Video} 
-              title="Surveillance Videos" 
-              count={activeTab === 'all' ? stats.videos : undefined}
-              onViewAll={activeTab === 'all' ? () => setActiveTab('videos') : undefined}
-            />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-              {data.videos.map(item => (
-                <VideoCard key={item.id} item={item} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Audio Section */}
-        {data.audio && data.audio.length > 0 && (
-          <section className="mb-12">
-            <SectionHeader 
-              icon={Music} 
-              title="Maxwell Proffer Recordings" 
-              count={activeTab === 'all' ? stats.audio : undefined}
-              onViewAll={activeTab === 'all' ? () => setActiveTab('audio') : undefined}
-            />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {data.audio.map(item => (
-                <AudioCard key={item.id} item={item} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Images Section */}
-        {data.images && data.images.length > 0 && activeTab !== 'flightlogs' && (
-          <section className="mb-12">
-            <SectionHeader 
-              icon={Image} 
-              title="Released Photos" 
-              count={activeTab === 'all' ? stats.images : undefined}
-              onViewAll={activeTab === 'all' ? () => setActiveTab('images') : undefined}
-            />
-            {activeTab === 'images' && people.length > 0 && (
-              <PeopleFilter
-                people={people}
-                selectedPerson={selectedPerson}
-                onSelectPerson={setSelectedPerson}
-                showDropdown={showPeopleFilter}
-                setShowDropdown={setShowPeopleFilter}
-                totalCount={stats.images || 0}
-              />
-            )}
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-              {data.images
-                .filter(item => {
-                  // Filter by selected person if set
-                  if (selectedPerson) {
-                    const itemPeople = (item.people || []).filter(p => p);
-                    const metadataPeople = (item.metadata?.detected_people || []).filter(p => p);
-                    const allPeople = [...itemPeople, ...metadataPeople].map(p => String(p).toLowerCase());
-                    return allPeople.includes(String(selectedPerson.name || '').toLowerCase());
-                  }
-                  
-                  // Filter by search query (searches title, description, and people)
-                  if (searchQuery && searchQuery.trim()) {
-                    const query = searchQuery.trim().toLowerCase();
-                    const itemPeople = (item.people || []).filter(p => p);
-                    const metadataPeople = (item.metadata?.detected_people || []).filter(p => p);
-                    const allPeople = [...itemPeople, ...metadataPeople].map(p => String(p).toLowerCase());
-                    
-                    // Search in title, description, context, and people
-                    const titleMatch = (item.title || '').toLowerCase().includes(query);
-                    const descMatch = (item.description || '').toLowerCase().includes(query);
-                    const contextMatch = (item.context || '').toLowerCase().includes(query);
-                    const peopleMatch = allPeople.some(p => p.includes(query));
-                    
-                    return titleMatch || descMatch || contextMatch || peopleMatch;
-                  }
-                  
-                  return true;
-                })
-                .sort((a, b) => {
-                  // Sort images with people to the top
-                  const aHasPeople = ((a.people || []).length > 0) || ((a.metadata?.detected_people || []).length > 0);
-                  const bHasPeople = ((b.people || []).length > 0) || ((b.metadata?.detected_people || []).length > 0);
-                  if (aHasPeople && !bHasPeople) return -1;
-                  if (!aHasPeople && bHasPeople) return 1;
-                  return 0;
-                })
-                .map((item, idx) => (
-                  <ImageCard 
-                    key={item.id || idx} 
-                    item={item} 
-                    onImageClick={setSelectedImage}
-                  />
-                ))}
-            </div>
-          </section>
-        )}
-
         {/* Flight Logs Section */}
         {data.images && data.images.length > 0 && activeTab === 'flightlogs' && (
           <section className="mb-12">

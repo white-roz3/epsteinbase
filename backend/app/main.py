@@ -213,9 +213,9 @@ async def get_documents(
         # Format results to match your existing SAMPLE_DATA structure
         results = []
         for row in rows:
-            # Construct URL from R2 if url is NULL but file_path exists
+            # Construct URL from R2 if url is NULL, empty, or invalid but file_path exists
             file_url = row['url']
-            if not file_url and row['file_path']:
+            if (not file_url or not file_url.startswith('http')) and row['file_path']:
                 try:
                     file_url = get_file_url(row['file_path']) or get_b2_url(row['file_path'])
                 except:
@@ -223,13 +223,13 @@ async def get_documents(
             
             # Construct thumbnail URL from R2 if thumbnail_path exists
             # If no thumbnail_path, use the main image URL as thumbnail
-            thumbnail_url = row['thumbnail_path']
-            if thumbnail_url:
+            thumbnail_url = row.get('thumbnail_url') or row['thumbnail_path']
+            if thumbnail_url and not thumbnail_url.startswith('http') and row.get('thumbnail_path'):
                 try:
-                    thumbnail_url = get_file_url(thumbnail_url) or get_b2_url(thumbnail_url)
+                    thumbnail_url = get_file_url(row['thumbnail_path']) or get_b2_url(row['thumbnail_path'])
                 except:
                     pass
-            elif file_url and row['type'] == 'image':
+            elif file_url and row['type'] == 'image' and not thumbnail_url:
                 # Use main image as thumbnail if no thumbnail available
                 thumbnail_url = file_url
             
