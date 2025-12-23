@@ -648,8 +648,12 @@ async def ingest_emails_endpoint():
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/admin/upload-emails-from-db")
-async def upload_emails_from_db_endpoint(db_path: Optional[str] = Form(None)):
-    """Admin endpoint to upload emails from offline SQLite database"""
+async def upload_emails_from_db_endpoint(db_path: Optional[str] = Query(None, description="Path to SQLite database file (relative to data/ or project root)")):
+    """Admin endpoint to upload emails from offline SQLite database
+    
+    Either provide db_path parameter or set OFFLINE_DB_PATH environment variable.
+    The database file should be in the data/ directory or project root.
+    """
     if not app.state.pool:
         raise HTTPException(status_code=503, detail="Database not connected")
     
