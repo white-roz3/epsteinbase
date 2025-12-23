@@ -383,8 +383,12 @@ function AudioCard({ item }) {
                 preload="metadata"
                 className="w-full h-9"
                 controls
+                crossOrigin="anonymous"
                 style={{
                   outline: 'none'
+                }}
+                onError={(e) => {
+                  console.error('Audio failed to load:', audioUrl);
                 }}
               >
                 Your browser does not support the audio element.
@@ -426,11 +430,13 @@ function AudioCard({ item }) {
 
 // Image card
 function ImageCard({ item, onImageClick }) {
-  const imageUrl = item.url || (item.file_path ? `${API_BASE}/files/${item.file_path}` : null);
-  // Use thumbnail if available - check thumbnail field first, then thumbnail_path (which might be a full URL), then main image
-  let thumbUrl = item.thumbnail;
+  // Prioritize thumbnail_url, then thumbnail, then thumbnail_path, then url, then construct from file_path
+  const imageUrl = item.url || (item.file_path && item.file_path.startsWith('http') 
+    ? item.file_path 
+    : (item.file_path ? `${API_BASE}/files/${item.file_path}` : null));
+  
+  let thumbUrl = item.thumbnail_url || item.thumbnail || null;
   if (!thumbUrl && item.thumbnail_path) {
-    // If thumbnail_path is already a full URL, use it directly; otherwise prepend API_BASE
     thumbUrl = item.thumbnail_path.startsWith('http') || item.thumbnail_path.startsWith('/')
       ? item.thumbnail_path
       : `${API_BASE}/files/${item.thumbnail_path}`;
@@ -1355,17 +1361,13 @@ export default function App() {
             onClick={(e) => e.stopPropagation()}
           >
             <img 
-              src={selectedImage.url || (selectedImage.file_path && selectedImage.file_path.startsWith('http') ? selectedImage.file_path : `${API_BASE}/files/${selectedImage.file_path}`)}
+              src={selectedImage.url || (selectedImage.file_path && selectedImage.file_path.startsWith('http') 
+                ? selectedImage.file_path 
+                : (selectedImage.file_path ? `${API_BASE}/files/${selectedImage.file_path}` : null))}
               alt={selectedImage.title || 'Image'}
               className="max-w-full max-h-[90vh] sm:max-h-full object-contain"
-              onError={(e) => {
-                console.error('Failed to load image:', selectedImage.url || selectedImage.file_path);
-                e.target.style.display = 'none';
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'text-white text-center p-4';
-                errorDiv.textContent = 'Failed to load image';
-                e.target.parentElement.appendChild(errorDiv);
-              }}
+              loading="eager"
+              crossOrigin="anonymous"
             />
           </div>
           <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-white text-center bg-black/80 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-2 rounded-lg max-w-[calc(100%-1rem)] sm:max-w-2xl">
