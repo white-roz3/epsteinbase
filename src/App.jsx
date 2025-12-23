@@ -1355,9 +1355,17 @@ export default function App() {
             onClick={(e) => e.stopPropagation()}
           >
             <img 
-              src={selectedImage.url || `${API_BASE}/files/${selectedImage.file_path}`}
-              alt={selectedImage.title}
+              src={selectedImage.url || (selectedImage.file_path && selectedImage.file_path.startsWith('http') ? selectedImage.file_path : `${API_BASE}/files/${selectedImage.file_path}`)}
+              alt={selectedImage.title || 'Image'}
               className="max-w-full max-h-[90vh] sm:max-h-full object-contain"
+              onError={(e) => {
+                console.error('Failed to load image:', selectedImage.url || selectedImage.file_path);
+                e.target.style.display = 'none';
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'text-white text-center p-4';
+                errorDiv.textContent = 'Failed to load image';
+                e.target.parentElement.appendChild(errorDiv);
+              }}
             />
           </div>
           <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-white text-center bg-black/80 backdrop-blur-sm px-3 py-2 sm:px-4 sm:py-2 rounded-lg max-w-[calc(100%-1rem)] sm:max-w-2xl">
