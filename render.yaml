@@ -1,6 +1,7 @@
 services:
   - type: web
     name: epsteinbase-api
+    runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     envVars:
