@@ -30,7 +30,8 @@ if STORAGE_TYPE == "r2" and R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY:
     SECRET_ACCESS_KEY = R2_SECRET_ACCESS_KEY
     BUCKET_NAME = R2_BUCKET_NAME
     S3_ENDPOINT = f"https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
-    PUBLIC_URL = R2_PUBLIC_URL or f"https://pub-{R2_ACCOUNT_ID}.r2.dev/{R2_BUCKET_NAME}"
+    # R2 public URL format: https://pub-{ACCOUNT_ID}.r2.dev (bucket name not in path)
+    PUBLIC_URL = R2_PUBLIC_URL or f"https://pub-{R2_ACCOUNT_ID}.r2.dev"
 elif B2_APPLICATION_KEY_ID and B2_APPLICATION_KEY:
     # B2 Configuration
     ACCESS_KEY_ID = B2_APPLICATION_KEY_ID
