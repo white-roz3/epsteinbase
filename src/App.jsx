@@ -427,8 +427,17 @@ function AudioCard({ item }) {
 // Image card
 function ImageCard({ item, onImageClick }) {
   const imageUrl = item.url || (item.file_path ? `${API_BASE}/files/${item.file_path}` : null);
-  // Use thumbnail if available, otherwise fall back to the main image
-  const thumbUrl = item.thumbnail || (item.thumbnail_path ? `${API_BASE}/files/${item.thumbnail_path}` : imageUrl);
+  // Use thumbnail if available - check thumbnail field first, then thumbnail_path (which might be a full URL), then main image
+  let thumbUrl = item.thumbnail;
+  if (!thumbUrl && item.thumbnail_path) {
+    // If thumbnail_path is already a full URL, use it directly; otherwise prepend API_BASE
+    thumbUrl = item.thumbnail_path.startsWith('http') || item.thumbnail_path.startsWith('/')
+      ? item.thumbnail_path
+      : `${API_BASE}/files/${item.thumbnail_path}`;
+  }
+  if (!thumbUrl) {
+    thumbUrl = imageUrl;
+  }
   
   return (
     <div
