@@ -186,6 +186,22 @@ async def get_documents(
         # Format results to match your existing SAMPLE_DATA structure
         results = []
         for row in rows:
+            # Construct URL from R2 if url is NULL but file_path exists
+            file_url = row['url']
+            if not file_url and row['file_path']:
+                try:
+                    file_url = get_file_url(row['file_path']) or get_b2_url(row['file_path'])
+                except:
+                    pass
+            
+            # Construct thumbnail URL from R2 if thumbnail_path exists
+            thumbnail_url = row['thumbnail_path']
+            if thumbnail_url:
+                try:
+                    thumbnail_url = get_file_url(thumbnail_url) or get_b2_url(thumbnail_url)
+                except:
+                    pass
+            
             item = {
                 "id": row['id'],
                 "efta_id": row['efta_id'],
@@ -197,9 +213,9 @@ async def get_documents(
                 "context": row['context'],
                 "date": row['date_released'].isoformat() if row['date_released'] else None,
                 "date_released": row['date_released'].isoformat() if row['date_released'] else None,
-                "url": row['url'],
+                "url": file_url,
                 "file_path": row['file_path'],
-                "thumbnail_path": row['thumbnail_path'],
+                "thumbnail_path": thumbnail_url or row['thumbnail_path'],
                 "duration": row['duration'],
                 "location": row['location'],
                 "downloadable": row['downloadable'],
@@ -238,6 +254,22 @@ async def get_document(doc_id: int):
         if not row:
             raise HTTPException(status_code=404, detail="Document not found")
         
+        # Construct URL from R2 if url is NULL but file_path exists
+        file_url = row['url']
+        if not file_url and row['file_path']:
+            try:
+                file_url = get_file_url(row['file_path']) or get_b2_url(row['file_path'])
+            except:
+                pass
+        
+        # Construct thumbnail URL from R2 if thumbnail_path exists
+        thumbnail_url = row['thumbnail_path']
+        if thumbnail_url and not (thumbnail_url.startswith('http') or thumbnail_url.startswith('/')):
+            try:
+                thumbnail_url = get_file_url(thumbnail_url) or get_b2_url(thumbnail_url)
+            except:
+                pass
+        
         return {
             "id": row['id'],
             "efta_id": row['efta_id'],
@@ -249,9 +281,9 @@ async def get_document(doc_id: int):
             "context": row['context'],
             "ocr_text": row['ocr_text'],
             "date": row['date_released'].isoformat() if row['date_released'] else None,
-            "url": row['url'],
+            "url": file_url,
             "file_path": row['file_path'],
-            "thumbnail_path": row['thumbnail_path'],
+            "thumbnail_path": thumbnail_url or row['thumbnail_path'],
             "duration": row['duration'],
             "location": row['location'],
             "downloadable": row['downloadable'],

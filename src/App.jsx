@@ -233,10 +233,10 @@ const TABS = [
 // Stats banner component
 function StatsBanner({ stats, useApi }) {
   const items = [
-    { label: 'DOJ Documents', value: stats.doj || '4,055+', icon: FileText },
-    { label: 'Videos', value: stats.videos || '2', icon: Video },
-    { label: 'Audio Files', value: stats.audio || '11', icon: Music },
-    { label: 'Photos', value: stats.images ? stats.images.toLocaleString() : '13,000+', icon: Image },
+    { label: 'DOJ Documents', value: stats.doj ? stats.doj.toLocaleString() : '0', icon: FileText },
+    { label: 'Videos', value: stats.videos ? stats.videos.toLocaleString() : '0', icon: Video },
+    { label: 'Audio Files', value: stats.audio ? stats.audio.toLocaleString() : '0', icon: Music },
+    { label: 'Photos', value: stats.images ? stats.images.toLocaleString() : '0', icon: Image },
   ];
 
   return (
@@ -817,31 +817,38 @@ export default function App() {
     const detected_people = metadata.detected_people || [];
     const all_people = [...new Set([...people, ...detected_people])]; // Combine and dedupe
 
-    // Convert file_path to URL - prioritize curated (public folder) over API endpoint
+    // Convert file_path to URL - prioritize API-provided URL (R2 URLs), then curated, then construct from file_path
     let fileUrl = null;
-    if (item.url && (item.url.startsWith('/curated/') || item.url.startsWith('http'))) {
-      // Already a full URL (curated file or external)
+    if (item.url && item.url.startsWith('http')) {
+      // Use R2/external URL if provided by API
+      fileUrl = item.url;
+    } else if (item.url && item.url.startsWith('/curated/')) {
+      // Already a curated path
       fileUrl = item.url;
     } else if (item.file_path) {
       // Check if it's a curated path (starts with /curated/)
       if (item.file_path.startsWith('/curated/')) {
         fileUrl = item.file_path;
       } else {
-        // Convert file_path to proper URL via /files endpoint
+        // Convert file_path to proper URL via /files endpoint (fallback for local files)
         fileUrl = `${API_BASE}/files/${item.file_path}`;
       }
-    } else if (item.url) {
-      // Fallback to external URL if no file_path
-      fileUrl = item.url;
     }
 
-    // Convert thumbnail_path to URL if it exists, fallback to main image
+    // Convert thumbnail_path to URL - prioritize API-provided thumbnail_path if it's a full URL
     let thumbnailUrl = null;
-    if (item.thumbnail_path) {
+    if (item.thumbnail_path && item.thumbnail_path.startsWith('http')) {
+      // Use R2/external thumbnail URL if provided by API
+      thumbnailUrl = item.thumbnail_path;
+    } else if (item.thumbnail_path && item.thumbnail_path.startsWith('/curated/')) {
+      // Curated thumbnail path
+      thumbnailUrl = item.thumbnail_path;
+    } else if (item.thumbnail_path) {
+      // Convert thumbnail_path to proper URL via /files endpoint
       thumbnailUrl = `${API_BASE}/files/${item.thumbnail_path}`;
-    } else if (item.thumbnail) {
-      // Fallback to thumbnail field if thumbnail_path doesn't exist
-      thumbnailUrl = item.thumbnail.startsWith('http') ? item.thumbnail : `${API_BASE}/files/${item.thumbnail}`;
+    } else if (item.thumbnail && item.thumbnail.startsWith('http')) {
+      // Fallback to thumbnail field if it's a full URL
+      thumbnailUrl = item.thumbnail;
     } else if (fileUrl) {
       // Fallback to main image URL if no thumbnail available
       thumbnailUrl = fileUrl;
