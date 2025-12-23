@@ -1,3 +1,9 @@
+databases:
+  - name: epsteinbase-db
+    databaseName: epsteinbase
+    user: epsteinbase
+    plan: free  # Free for 90 days, then $7/month
+
 services:
   - type: web
     name: epsteinbase-api
@@ -9,7 +15,10 @@ services:
         value: 10000
       - key: PYTHON_VERSION
         value: "3.11.9"
-      # Database URL will be set automatically when you add PostgreSQL
+      - key: DATABASE_URL
+        fromDatabase:
+          name: epsteinbase-db
+          property: connectionString
       # B2 credentials - set these in Render dashboard
       # - key: B2_APPLICATION_KEY_ID
       #   sync: false
@@ -17,11 +26,5 @@ services:
       #   sync: false
       # - key: B2_BUCKET_NAME
       #   value: Epsteinbase
-
-databases:
-  - name: epsteinbase-db
-    databaseName: epsteinbase
-    user: epsteinbase
-    plan: free  # Free for 90 days, then $7/month
 
 
