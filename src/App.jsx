@@ -977,10 +977,18 @@ export default function App() {
         'images': 'image',
         'emails': 'email',
         'documents': 'document',
-        'flightlogs': 'image' // Flight logs are images, filtered by source
+        'flightlogs': 'image' // Flight logs are images, filtered by file_path
       };
       params.set('type', typeMap[activeTab] || activeTab);
     }
+    
+    // Add flightlogs filter: true for flightlogs tab, false for images tab (to exclude flight logs)
+    if (activeTab === 'flightlogs') {
+      params.set('flightlogs', 'true');
+    } else if (activeTab === 'images') {
+      params.set('flightlogs', 'false');  // Exclude flight logs from regular images
+    }
+    
     params.set('page', '1');
     params.set('per_page', '1000');
     const apiUrl = `${API_BASE}/api/documents?${params}`;

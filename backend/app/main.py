@@ -121,6 +121,7 @@ async def get_documents(
     type: Optional[str] = None,
     source: Optional[str] = None,
     year: Optional[int] = None,
+    flightlogs: Optional[bool] = Query(None, description="Filter for flight logs (images with 'flight' or 'contact' in file_path)"),
     page: int = Query(1, ge=1),
     per_page: int = Query(50, ge=1, le=1000)
 ):
@@ -128,7 +129,8 @@ async def get_documents(
     if not app.state.pool:
         # If no database, return filesystem images for image type
         if type == 'image' or type is None:
-            return await list_local_images(page=page, per_page=per_page)
+            filter_param = "flightlogs" if flightlogs else None
+            return await list_local_images(page=page, per_page=per_page, filter=filter_param)
         return {"results": [], "total": 0, "page": page, "per_page": per_page}
     async with app.state.pool.acquire() as conn:
         where_clauses = []
@@ -160,6 +162,19 @@ async def get_documents(
             where_clauses.append(f"EXTRACT(YEAR FROM date_released) = ${idx}")
             params.append(year)
             idx += 1
+        
+        # Filter for flight logs: images with "flight" or "contact" in file_path
+        if flightlogs:
+            where_clauses.append(f"(LOWER(file_path) LIKE ${idx} OR LOWER(file_path) LIKE ${idx + 1})")
+            params.append("%flight%")
+            params.append("%contact%")
+            idx += 2
+        elif flightlogs is False:
+            # Exclude flight logs (for regular images tab)
+            where_clauses.append(f"(LOWER(file_path) NOT LIKE ${idx} AND LOWER(file_path) NOT LIKE ${idx + 1})")
+            params.append("%flight%")
+            params.append("%contact%")
+            idx += 2
         
         where_sql = " AND ".join(where_clauses) if where_clauses else "1=1"
         
