@@ -454,11 +454,15 @@ function ImageCard({ item, onImageClick }) {
         {thumbUrl ? (
           <img 
             src={thumbUrl} 
-            alt={item.title}
+            alt={item.title || 'Image'}
             className="w-full h-full object-cover"
+            loading="lazy"
             onError={(e) => {
+              console.error('Thumbnail failed:', thumbUrl);
               e.target.style.display = 'none';
-              e.target.nextSibling.style.display = 'flex';
+              if (e.target.nextSibling) {
+                e.target.nextSibling.style.display = 'flex';
+              }
             }}
           />
         ) : null}
