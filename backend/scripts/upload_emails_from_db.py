@@ -21,7 +21,7 @@ RENDER_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@
 async def upload_emails_from_sqlite():
     """Read emails from SQLite and upload to PostgreSQL"""
     
-    # Check if offline DB exists
+    # Check if offline DB exists - try multiple locations
     db_path = Path(OFFLINE_DB_PATH)
     if not db_path.exists():
         # Try relative to current directory
@@ -39,10 +39,10 @@ async def upload_emails_from_sqlite():
                 print(f"Or set OFFLINE_DB_PATH environment variable")
                 return
     
-    OFFLINE_DB_PATH = str(db_path)
+    db_file_path = str(db_path)
     
-    print(f"Connecting to offline database: {OFFLINE_DB_PATH}")
-    offline_db = sqlite3.connect(OFFLINE_DB_PATH)
+    print(f"Connecting to offline database: {db_file_path}")
+    offline_db = sqlite3.connect(db_file_path)
     offline_db.row_factory = sqlite3.Row  # Enable column access by name
     
     # Try different table names
