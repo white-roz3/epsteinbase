@@ -471,11 +471,19 @@ function ImageCard({ item, onImageClick }) {
             className="w-full h-full object-cover"
             loading="lazy"
             onError={(e) => {
-              console.error('Thumbnail failed:', thumbUrl);
-              e.target.style.display = 'none';
-              if (e.target.nextSibling) {
-                e.target.nextSibling.style.display = 'flex';
+              console.error('Thumbnail failed to load:', thumbUrl, item.id);
+              // Try fallback to main image URL if thumbnail fails
+              if (thumbUrl !== imageUrl && imageUrl) {
+                e.target.src = imageUrl;
+              } else {
+                e.target.style.display = 'none';
+                if (e.target.nextSibling) {
+                  e.target.nextSibling.style.display = 'flex';
+                }
               }
+            }}
+            onLoad={() => {
+              console.log('Thumbnail loaded successfully:', item.id);
             }}
           />
         ) : null}
