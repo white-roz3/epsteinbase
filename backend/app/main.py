@@ -632,6 +632,21 @@ async def ingest_r2_endpoint():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/admin/ingest-emails")
+async def ingest_emails_endpoint():
+    """Admin endpoint to extract and ingest emails from PDFs into database"""
+    if not app.state.pool:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    try:
+        async with app.state.pool.acquire() as conn:
+            # Import here to avoid circular dependency
+            from .ingest_emails import ingest_emails_async
+            result = await ingest_emails_async(conn)
+            return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/admin/fix-urls")
 async def fix_urls_endpoint():
     """Admin endpoint to fix broken image URLs by reconstructing from file_path"""
