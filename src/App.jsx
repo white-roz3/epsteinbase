@@ -381,20 +381,21 @@ function AudioCard({ item }) {
               <audio
                 key={audioUrl} // Force re-render if URL changes
                 src={audioUrl}
-                preload="auto"
+                preload="metadata"
                 className="w-full h-9"
                 controls
-                crossOrigin="anonymous"
+                controlsList="nodownload"
                 style={{
                   outline: 'none'
                 }}
                 onError={(e) => {
-                  console.error('Audio failed to load:', audioUrl, e);
+                  console.error('Audio failed to load:', audioUrl, e.target.error);
                 }}
-                onLoadedData={(e) => {
-                  console.log('Audio loaded:', audioUrl);
-                  // Auto-enable play button when loaded
-                  e.target.controls = true;
+                onCanPlay={(e) => {
+                  console.log('Audio can play:', audioUrl);
+                }}
+                onLoadedMetadata={(e) => {
+                  console.log('Audio metadata loaded:', audioUrl, 'Duration:', e.target.duration);
                 }}
               >
                 Your browser does not support the audio element.
