@@ -450,6 +450,11 @@ function ImageCard({ item, onImageClick }) {
     thumbUrl = imageUrl;
   }
   
+  // Don't render if we have no valid URLs at all
+  if (!imageUrl && !thumbUrl) {
+    return null;
+  }
+  
   return (
     <div
       onClick={() => onImageClick && imageUrl && onImageClick(item)}
