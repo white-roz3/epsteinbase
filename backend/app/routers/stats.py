@@ -55,3 +55,4 @@ async def get_people(pool: asyncpg.Pool = Depends(get_db_pool)):
         return [{"name": row["name"], "doc_count": row["doc_count"]} for row in rows]
 
 
+

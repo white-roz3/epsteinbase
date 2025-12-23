@@ -100,3 +100,4 @@ python3 ingest_huggingface.py  # Downloads and ingests ~25,000 documents
 - Thumbnails: `data/thumbnails/` (when extraction runs)
 
 
+

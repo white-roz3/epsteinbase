@@ -547,3 +547,18 @@ async def health():
         return {"status": "healthy", "database": "connected"}
     except Exception as e:
         return {"status": "unhealthy", "error": str(e)}
+
+@app.post("/api/admin/ingest-r2")
+async def ingest_r2_endpoint():
+    """Admin endpoint to ingest files from R2 into database"""
+    if not app.state.pool:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    try:
+        async with app.state.pool.acquire() as conn:
+            # Import here to avoid circular dependency
+            from .ingest_r2 import ingest_from_r2_async
+            result = await ingest_from_r2_async(conn)
+            return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

@@ -1,7 +1,30 @@
+# Exclude backend and API directories - backend is on Render
+backend/
+api/
 data/
-node_modules/
+*.py
 __pycache__/
+.python/
 *.pyc
-.env
-.env.local
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
 
+# Exclude large data files
+public/curated/
+public/images/
+data/audio/
+data/videos/
+data/thumbnails/
+data/extracted/
+
+# Other
+.git/
+node_modules/
+.wrangler/

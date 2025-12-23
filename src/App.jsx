@@ -6,7 +6,6 @@ import {
 } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-const MEDIA_BASE = import.meta.env.VITE_MEDIA_URL || 'http://localhost:8001';
 
 // Embedded sample data - shows immediately, replaced by API when available
 const SAMPLE_DATA = {
@@ -339,15 +338,12 @@ function VideoCard({ item }) {
 
 // Audio card
 function AudioCard({ item }) {
-  // Construct audio URL - prioritize external URL, then use MEDIA_BASE
+  // Construct audio URL - prioritize external URL, then file_path
   let audioUrl = null;
-  if (item.url && item.url.startsWith('http')) {
+  if (item.url) {
     audioUrl = item.url;
   } else if (item.file_path) {
-    const cleanPath = item.file_path.startsWith('/') ? item.file_path.slice(1) : item.file_path;
-    audioUrl = `${MEDIA_BASE}/media/${cleanPath}`;
-  } else if (item.url) {
-    audioUrl = item.url;
+    audioUrl = `${API_BASE}/files/${item.file_path}`;
   }
   
   return (
@@ -430,28 +426,9 @@ function AudioCard({ item }) {
 
 // Image card
 function ImageCard({ item, onImageClick }) {
-  // Use MEDIA_BASE for images, external URLs as-is
-  let imageUrl = null;
-  if (item.url && item.url.startsWith('http')) {
-    imageUrl = item.url;
-  } else if (item.url && item.url.startsWith('/curated/')) {
-    imageUrl = item.url;
-  } else if (item.file_path) {
-    const cleanPath = item.file_path.startsWith('/') ? item.file_path.slice(1) : item.file_path;
-    imageUrl = `${MEDIA_BASE}/media/${cleanPath}`;
-  }
-  
+  const imageUrl = item.url || (item.file_path ? `${API_BASE}/files/${item.file_path}` : null);
   // Use thumbnail if available, otherwise fall back to the main image
-  let thumbUrl = imageUrl;
-  if (item.thumbnail && (item.thumbnail.startsWith('http') || item.thumbnail.startsWith('/curated/'))) {
-    thumbUrl = item.thumbnail;
-  } else if (item.thumbnail_path) {
-    const cleanPath = item.thumbnail_path.startsWith('/') ? item.thumbnail_path.slice(1) : item.thumbnail_path;
-    thumbUrl = `${MEDIA_BASE}/media/${cleanPath}`;
-  } else if (item.thumbnail) {
-    const cleanPath = item.thumbnail.startsWith('/') ? item.thumbnail.slice(1) : item.thumbnail;
-    thumbUrl = `${MEDIA_BASE}/media/${cleanPath}`;
-  }
+  const thumbUrl = item.thumbnail || (item.thumbnail_path ? `${API_BASE}/files/${item.thumbnail_path}` : imageUrl);
   
   return (
     <div
@@ -840,38 +817,31 @@ export default function App() {
     const detected_people = metadata.detected_people || [];
     const all_people = [...new Set([...people, ...detected_people])]; // Combine and dedupe
 
-    // Convert file_path to URL - use MEDIA_BASE for local media, external URLs as-is
+    // Convert file_path to URL - prioritize curated (public folder) over API endpoint
     let fileUrl = null;
-    if (item.url && item.url.startsWith('http')) {
-      // External URL (DOJ, etc.) - use as-is
-      fileUrl = item.url;
-    } else if (item.url && item.url.startsWith('/curated/')) {
-      // Curated files in public folder (for Vercel deployment) - use as-is
+    if (item.url && (item.url.startsWith('/curated/') || item.url.startsWith('http'))) {
+      // Already a full URL (curated file or external)
       fileUrl = item.url;
     } else if (item.file_path) {
-      // Local media file - use MEDIA_BASE
-      // Remove leading slash if present, media server expects relative path
-      const cleanPath = item.file_path.startsWith('/') ? item.file_path.slice(1) : item.file_path;
-      fileUrl = `${MEDIA_BASE}/media/${cleanPath}`;
+      // Check if it's a curated path (starts with /curated/)
+      if (item.file_path.startsWith('/curated/')) {
+        fileUrl = item.file_path;
+      } else {
+        // Convert file_path to proper URL via /files endpoint
+        fileUrl = `${API_BASE}/files/${item.file_path}`;
+      }
     } else if (item.url) {
-      // Fallback to url if no file_path
+      // Fallback to external URL if no file_path
       fileUrl = item.url;
     }
 
     // Convert thumbnail_path to URL if it exists, fallback to main image
     let thumbnailUrl = null;
     if (item.thumbnail_path) {
-      // Use MEDIA_BASE for thumbnails
-      const cleanPath = item.thumbnail_path.startsWith('/') ? item.thumbnail_path.slice(1) : item.thumbnail_path;
-      thumbnailUrl = `${MEDIA_BASE}/media/${cleanPath}`;
+      thumbnailUrl = `${API_BASE}/files/${item.thumbnail_path}`;
     } else if (item.thumbnail) {
-      // Fallback to thumbnail field
-      if (item.thumbnail.startsWith('http') || item.thumbnail.startsWith('/curated/')) {
-        thumbnailUrl = item.thumbnail;
-      } else {
-        const cleanPath = item.thumbnail.startsWith('/') ? item.thumbnail.slice(1) : item.thumbnail;
-        thumbnailUrl = `${MEDIA_BASE}/media/${cleanPath}`;
-      }
+      // Fallback to thumbnail field if thumbnail_path doesn't exist
+      thumbnailUrl = item.thumbnail.startsWith('http') ? item.thumbnail : `${API_BASE}/files/${item.thumbnail}`;
     } else if (fileUrl) {
       // Fallback to main image URL if no thumbnail available
       thumbnailUrl = fileUrl;
@@ -1371,7 +1341,7 @@ export default function App() {
             onClick={(e) => e.stopPropagation()}
           >
             <img 
-              src={selectedImage.url || (selectedImage.file_path ? `${MEDIA_BASE}/media/${selectedImage.file_path.replace(/^\//, '')}` : '')}
+              src={selectedImage.url || `${API_BASE}/files/${selectedImage.file_path}`}
               alt={selectedImage.title}
               className="max-w-full max-h-[90vh] sm:max-h-full object-contain"
             />
